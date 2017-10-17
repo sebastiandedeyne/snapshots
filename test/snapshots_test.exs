@@ -4,6 +4,6 @@ defmodule SnapshotsTest do
   doctest Snapshots
 
   test "greets the world" do
-    assert_snapshot "Hello, world!", Snapshots.Drivers.Text
+    assert_snapshot "Hello, world!"
   end
 end

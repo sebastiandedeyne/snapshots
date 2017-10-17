@@ -9,20 +9,24 @@ defmodule Snapshots do
     end
   end
 
-  defmacro assert_snapshot(expected, driver) do
+  defmacro assert_snapshot(expected, driver \\ Snapshots.Drivers.Text) do
     quote do
-      snapshot = %Snapshots.Snapshot{
-        name: get_name(__ENV__),
-        dir: get_dir(__ENV__),
-        driver: unquote(driver)
-      }
+      snapshot = Snapshots.create(__ENV__, unquote(driver))
 
       if Snapshots.exists?(snapshot) do
-        assert unquote(expected) == Snapshot.read(snapshot)
+        assert unquote(expected) == Snapshots.read(snapshot)
       else
         Snapshots.write(snapshot, unquote(expected))
       end
     end
+  end
+
+  def create(env, driver) do
+    %Snapshots.Snapshot{
+      name: get_name(env),
+      dir: get_dir(env),
+      driver: driver
+    }
   end
 
   def read(snapshot) do
