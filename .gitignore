@@ -3,3 +3,4 @@ _build
 composer.lock
 docs
 vendor
+test/__snapshots__/create_a_new_snapshot.txt
