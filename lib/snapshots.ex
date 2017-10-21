@@ -17,6 +17,8 @@ defmodule Snapshots do
         assert unquote(expected) == Snapshots.read(snapshot)
       else
         Snapshots.write(snapshot, unquote(expected))
+
+        IO.puts(IO.ANSI.yellow() <> "Created snapshot for \"#{snapshot.name}\"")
       end
     end
   end
