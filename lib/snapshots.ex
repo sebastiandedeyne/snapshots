@@ -3,23 +3,46 @@ defmodule Snapshots do
   Documentation for Snapshots.
   """
 
+  import ExUnit.Assertions
+
   defmacro __using__(_opts) do
     quote do
       import Snapshots, only: :macros
     end
   end
 
-  defmacro assert_snapshot(expected, driver \\ Snapshots.Drivers.Text) do
-    quote do
-      snapshot = Snapshots.create(__ENV__, unquote(driver))
+  defmacro test_snapshot(message, var \\ quote(do: _), contents) do
+    contents =
+      case contents do
+        [do: block] ->
+          quote do
+            Snapshots.assert_snapshot(__ENV__, unquote(block))
+            :ok
+          end
 
-      if Snapshots.exists?(snapshot) do
-        assert unquote(expected) == Snapshots.read(snapshot)
-      else
-        Snapshots.write(snapshot, unquote(expected))
-
-        IO.puts(IO.ANSI.yellow() <> "Created snapshot for \"#{snapshot.name}\"")
+        _ ->
+          quote do
+            Snapshots.assert_snapshot(__ENV__, try(unquote(contents)))
+            :ok
+          end
       end
+
+    var = Macro.escape(var)
+    contents = Macro.escape(contents, unquote: true)
+
+    quote bind_quoted: [var: var, contents: contents, message: message] do
+      name = ExUnit.Case.register_test(__ENV__, :test, message, [:not_implemented])
+      def unquote(name)(unquote(var)), do: unquote(contents)
+    end
+  end
+
+  def assert_snapshot(env, expected, driver \\ Snapshots.Drivers.Text) do
+    snapshot = Snapshots.create(env, driver)
+
+    if Snapshots.exists?(snapshot) do
+      assert expected == Snapshots.read(snapshot)
+    else
+      Snapshots.write(snapshot, expected)
     end
   end
 
