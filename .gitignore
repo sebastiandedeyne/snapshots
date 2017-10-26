@@ -1,6 +1,7 @@
-build
 _build
-composer.lock
-docs
-vendor
+build
+deps
+doc
+mix.lock
 test/__snapshots__/create_a_new_snapshot.txt
+vendor
